@@ -55,7 +55,16 @@ jobs:
           pip install coverage
       - name: Test the code
         run: coverage run -m project_name.my_module && coverage xml
+      - name: Check SonarQube token
+        id: sonar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -n "$SONAR_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: SonarQube Cloud Scan
+        if: steps.sonar.outputs.enabled == 'true'
         uses: SonarSource/sonarqube-scan-action@c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2  # v7.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
